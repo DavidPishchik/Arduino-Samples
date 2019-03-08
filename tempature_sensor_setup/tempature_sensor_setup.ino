@@ -6,8 +6,8 @@
 #include <DHT.h>
 
 //Constants
-#define PLUSTEMPPIN 1     
-#define MINUSTEMPPIN 2    
+int plusswitchpin = 0;     
+int minuswitchpin = 0;    
 #define DHTPIN 8     // Define DHT Pin 
 #define DHTTYPE DHT22  // Define DHT 22  (AM2302) 
 DHT dht(DHTPIN, DHTTYPE); //// Initialize DHT sensor for normal 16mhz Arduino
@@ -21,6 +21,9 @@ int baseTemp = 20;
 
 void setup() {
 
+  pinMode(12, INPUT);
+  pinMode(13, INPUT);
+  
   Serial.begin(9600);
   dht.begin();
 
@@ -29,17 +32,21 @@ void setup() {
 
 
 void loop() {
-
+  plusswitchpin = digitalRead(7);
+  minuswitchpin = digitalRead(6);
     delay(2000);
     //Read data and store it to variables hum and temp
     hum = dht.readHumidity();
     temp= dht.readTemperature();
 
-    if (PLUSTEMPPIN == HIGH){
+    if (plusswitchpin == 1){
       baseTemp++;
+       Serial.print("increase by 1: ");
     }
-    if (MINUSTEMPPIN == HIGH){
-       baseTemp--;
+    
+    if (minuswitchpin == 1){
+       baseTemp--   ;
+        Serial.print("decrease by 1: ");
     }
     
     //Print temp and humidity values to serial monitor
@@ -57,7 +64,7 @@ void loop() {
          Serial.print(baseTemp);
          Serial.print(" %,  Hot Temp: ");
     }
-    delay(1000); //Delay 2 sec.
+    delay(500); //Delay 2 sec.
 }
 
 boolean hotTemp(int temp, int baseTemp)
