@@ -21,8 +21,8 @@ int baseTemp = 20;
 
 void setup() {
 
-  pinMode(12, INPUT);
-  pinMode(13, INPUT);
+  pinMode(12, INPUT); // Btn to adjsut BaseTemp
+  pinMode(13, INPUT); // Btn to adjsut BaseTemp
   
   Serial.begin(9600);
   dht.begin();

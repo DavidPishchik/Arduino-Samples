@@ -1,25 +1,8 @@
-/*
-  Arduino Starter Kit example
- Project 5  - Servo Mood Indicator
-
- This sketch is written to accompany Project 5 in the
- Arduino Starter Kit
-
- Parts required:
- servo motor
- 10 kilohm potentiometer
- 2 100 uF electrolytic capacitors
-
- Created 13 September 2012
- by Scott Fitzgerald
-
- http://www.arduino.cc/starterKit
-
- This example code is part of the public domain
- */
-
 // include the servo library
 #include <Servo.h>
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
 
 Servo myServo;  // create a servo object
 
@@ -28,7 +11,13 @@ int potVal;  // variable to read the value from the analog pin
 int angle;   // variable to hold the angle for the servo motor
 int switchState = 0;
 void setup() {
-    pinMode(2, INPUT);
+  lcd.begin(16, 2);
+  pinMode(2, INPUT);
+  lcd.print("ask the");
+
+
+  
+  
   myServo.attach(9); // attaches the servo on pin 9 to the servo object
   Serial.begin(9600); // open a serial connection to your computer
 }
