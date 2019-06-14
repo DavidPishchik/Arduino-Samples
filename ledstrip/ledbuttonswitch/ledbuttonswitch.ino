@@ -2,7 +2,7 @@
 #include "LPD8806.h"
 #include "SPI.h" // Comment out this line if using Trinket or Gemma
 #ifdef __AVR_ATtiny85__
- #include <avr/power.h>
+#include <avr/power.h>
 #endif
 
 // Example to control LPD8806-based RGB LED Modules in a strip
@@ -24,83 +24,89 @@ int buttonState = 0;         // current state of the button
 int lastButtonState = 0;     // previous state of the button
 
 
+int const potPin = A0;    // select the input pin for the potentiometer
+int val;      // variable to store the value coming from the sensor
+int previousVal = 0;
+
+int r = 255;
+int g, b = 0;
+
 
 // First parameter is the number of LEDs in the strand.  The LED strips
 // are 32 LEDs per meter but you can extend or cut the strip.  Next two
 // parameters are SPI data and clock pins:
 LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
-
-// You can optionally use hardware SPI for faster writes, just leave out
-// the data and clock pin parameters.  But this does limit use to very
-// specific pins on the Arduino.  For "classic" Arduinos (Uno, Duemilanove,
-// etc.), data = pin 11, clock = pin 13.  For Arduino Mega, data = pin 51,
-// clock = pin 52.  For 32u4 Breakout Board+ and Teensy, data = pin B2,
-// clock = pin B1.  For Leonardo, this can ONLY be done on the ICSP pins.
 //LPD8806 strip = LPD8806(nLEDs);
 
 void setup() {
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
-  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
-#endif
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
+    clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
+  #endif
   pinMode(switchPin ,INPUT);
-  // Start up the LED strip
   Serial.begin(9600);
   strip.begin();
-
-  // Update the strip, to start they are all 'off'
   strip.show();
-  
 }
 
 
 void loop() {
- // read the pushbutton input pin:
+  // read the pushbutton input pin:
   buttonState = digitalRead(switchPin);
+  
+  // read the value from the sensor
+  val = analogRead(potPin);   
+
 
   // compare the buttonState to its previous state
- 
   if (buttonState != lastButtonState) {
     // if the state has changed, increment the counter
     if (buttonState == HIGH) {
-      // if the current state is HIGH then the button
-      // wend from off to on:
       buttonPushCounter++;
       Serial.println("on");
       Serial.print("number of button pushes:  ");
       Serial.println(buttonPushCounter);
     } else {
-      // if the current state is LOW then the button
-      // wend from on to off:
       Serial.println("off");
     }
-    // Delay a little bit to avoid bouncing
+    
     delay(50);
   }
-  // save the current state as the last state,
-  //for next time through the loop
-  lastButtonState = buttonState;
-       if(buttonPushCounter == 0){
-          colorCustom(strip.Color(127, 127, 127), 50); // white
-       }
-        else if(buttonPushCounter == 1) {
-          colorCustom(strip.Color(127,   0,   0), 50); // Red
-       }
-       else if(buttonPushCounter == 2) {
-          colorCustom(strip.Color(127, 127,   0), 50); // yellow
-       }
-       else if(buttonPushCounter == 3) {
-          colorCustom(strip.Color(  0, 127,   0), 50); // Green
-       }
-       else if(buttonPushCounter == 4) {
-          colorCustom(strip.Color(  0, 127, 127), 50); // Cyan
-       }
-       else if(buttonPushCounter == 5) {
-          colorCustom(strip.Color(  0,   0, 127), 50); // Blue
-       }
-       else if(buttonPushCounter == 6) {
-          colorCustom(strip.Color(127,   0, 127), 50); // Violet
-          buttonPushCounter = 0;
-       }
+
+
+  if (val > previousVal){
+    Serial.println("increasing in number");   
+    goThroughColors(val);
+    previousVal = val;
+  } else if (val < previousVal) {
+//    Serial.println("decreasing in number"); 
+     previousVal = val;
+  } else {
+//     Serial.println("not chnaging colors"); 
+  }
+ 
+//  lastButtonState = buttonState;
+//       if(buttonPushCounter == 0){
+//          colorCustom(strip.Color(127, 127, 127), 50); // white
+//       }
+//        else if(buttonPushCounter == 1) {
+//          colorCustom(strip.Color(127,   0,   0), 50); // Red
+//       }
+//       else if(buttonPushCounter == 2) {
+//          colorCustom(strip.Color(127, 127,   0), 50); // yellow
+//       }
+//       else if(buttonPushCounter == 3) {
+//          colorCustom(strip.Color(  0, 127,   0), 50); // Green
+//       }
+//       else if(buttonPushCounter == 4) {
+//          colorCustom(strip.Color(  0, 127, 127), 50); // Cyan
+//       }
+//       else if(buttonPushCounter == 5) {
+//          colorCustom(strip.Color(  0,   0, 127), 50); // Blue
+//       }
+//       else if(buttonPushCounter == 6) {
+//          colorCustom(strip.Color(127,   0, 127), 50); // Violet
+//          buttonPushCounter = 0;
+//       }
    
    
      
@@ -133,6 +139,33 @@ void loop() {
   theaterChaseRainbow(50);
   */
 }
+
+void goThroughColors(int val){
+  if (val <= 384){
+    g += 1;
+  }  else if (val > 384 && val <= 512 ){
+    r -= 1;
+  } else if (val > 512 && val <= 640 ){
+    b += 1;
+  } else if (val > 640 && val <= 768 ){
+    g -= 1;
+  } else if (val > 768 && val <= 1024 ){
+    r += 1;
+  }
+  colorChase(strip.Color(r,   g,  b), 50); 
+      Serial.print("r :"); 
+    Serial.println(r); 
+    Serial.print("g : "); 
+    Serial.println(g); 
+    Serial.print("B :"); 
+    Serial.println(b); 
+    Serial.println(val);  // stop the program for some time
+
+ 
+
+};
+
+
 
 void colorCustom(uint32_t c, uint8_t wait) {
   int i;
